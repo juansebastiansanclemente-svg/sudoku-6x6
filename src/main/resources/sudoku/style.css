@@ -1,0 +1,19 @@
+.borde-derecho-bloque{
+    -fx-border-color: black;
+    -fx-border-width: 0 1 0 0;
+}
+
+.borde-inferior-bloque{
+    -fx-border-color: black;
+    -fx-border-width: 0 0 1 0;
+}
+
+.borde-derecho-bloque.borde-inferior-bloque{
+    -fx-border-color: black;
+    -fx-border-width: 0 1 1 0;
+}
+
+.tablero{
+    -fx-border-color: black;
+    -fx-border-width: 2;
+}
