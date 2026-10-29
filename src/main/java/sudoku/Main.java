@@ -5,15 +5,15 @@ import javafx.stage.Stage;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.stage.Stage;
 
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("sudoku-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/sudoku/sudoku-view.fxml"));
         Parent root = loader.load();
 
         Scene scene = new Scene(root);
+        scene.getStylesheets().add(getClass().getResource("/sudoku/style.css").toExternalForm());
         stage.setTitle("Sudoku 6x6");
         stage.setScene(scene);
         stage.show();
