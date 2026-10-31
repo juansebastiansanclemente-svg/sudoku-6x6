@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+
+<BorderPane fx:controller="sudoku.controller.SudokuController" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1">
+    <top>
+        <HBox prefHeight="50.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <children>
+                <Button fx:id="nuevoJuegoButton" mnemonicParsing="false" text="Nuevo Juego" />
+                <Button fx:id="ayudaButton" mnemonicParsing="false" text="Ayuda" />
+                <Label fx:id="mensajeLabel" text="Lorem Ipsum" />
+            </children>
+        </HBox>
+    </top>
+    <center>
+        <GridPane fx:id="tableroGrid" styleClass="tablero" maxHeight="-Infinity" maxWidth="-Infinity" BorderPane.alignment="CENTER">
+            <columnConstraints>
+                <ColumnConstraints minWidth="60.0" prefWidth="60.0" />
+                <ColumnConstraints minWidth="60.0" prefWidth="60.0" />
+                <ColumnConstraints minWidth="60.0" prefWidth="60.0" />
+                <ColumnConstraints minWidth="60.0" prefWidth="60.0" />
+                <ColumnConstraints minWidth="60.0" prefWidth="60.0" />
+                <ColumnConstraints minWidth="60.0" prefWidth="60.0" />
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="60.0" prefHeight="60.0" />
+                <RowConstraints minHeight="60.0" prefHeight="60.0" />
+                <RowConstraints minHeight="60.0" prefHeight="60.0" />
+                <RowConstraints minHeight="60.0" prefHeight="60.0" />
+                <RowConstraints minHeight="60.0" prefHeight="60.0" />
+                <RowConstraints minHeight="60.0" prefHeight="60.0" />
+            </rowConstraints>
+        </GridPane>
+    </center>
+</BorderPane>
