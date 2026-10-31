@@ -10,7 +10,7 @@
             <children>
                 <Button fx:id="nuevoJuegoButton" mnemonicParsing="false" text="Nuevo Juego" />
                 <Button fx:id="ayudaButton" mnemonicParsing="false" text="Ayuda" />
-                <Label fx:id="mensajeLabel" text="Lorem Ipsum" />
+                <Label fx:id="mensajeLabel" text="Presiona Nuevo Juego para iniciar" />
             </children>
         </HBox>
     </top>
