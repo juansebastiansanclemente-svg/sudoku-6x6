@@ -1,19 +1,25 @@
 .borde-derecho-bloque{
     -fx-border-color: black;
-    -fx-border-width: 0 1 0 0;
+    -fx-border-width: 0 2 0 0;
 }
 
 .borde-inferior-bloque{
     -fx-border-color: black;
-    -fx-border-width: 0 0 1 0;
+    -fx-border-width: 0 0 2 0;
 }
 
 .borde-derecho-bloque.borde-inferior-bloque{
     -fx-border-color: black;
-    -fx-border-width: 0 1 1 0;
+    -fx-border-width: 0 2 2 0;
 }
 
 .tablero{
     -fx-border-color: black;
     -fx-border-width: 2;
+}
+
+.celda-fija {
+    -fx-background-color: #e0e0e0;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
 }
