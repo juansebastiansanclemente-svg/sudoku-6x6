@@ -19,7 +19,8 @@
 }
 
 .celda-fija {
-    -fx-background-color: #e0e0e0;
+    -fx-background-color: #b0b0b0, #e0e0e0;
+    -fx-background-insets: 0, 1;
     -fx-font-weight: bold;
     -fx-font-size: 18px;
 }
