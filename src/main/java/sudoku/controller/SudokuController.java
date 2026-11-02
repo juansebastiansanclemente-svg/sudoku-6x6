@@ -15,7 +15,8 @@ public class SudokuController {
     private final Partida partida = new Partida();
 
     @FXML
-    public void initialize() {construirTablero();
+    public void initialize() {
+        construirTablero();
     }
     private void construirTablero(){
     Tablero tablero = partida.getTablero();
@@ -42,4 +43,3 @@ public class SudokuController {
         }
     }
 }
-
