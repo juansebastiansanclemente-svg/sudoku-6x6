@@ -42,3 +42,8 @@
     -fx-background-insets: 0, 2;
     -fx-text-fill: #b71c1c;
 }
+.celda-error {
+    -fx-border-color: red;
+    -fx-border-width: 2;
+    -fx-text-fill: red;
+}
