@@ -24,3 +24,21 @@
     -fx-font-weight: bold;
     -fx-font-size: 18px;
 }
+
+.text-field:focused {
+    -fx-background-color: #2a7fff, #dbeaff;
+    -fx-background-insets: 0, 2;
+}
+
+.celda-sugerencia,
+.celda-sugerencia:focused {
+    -fx-background-color: #f9a825, #fff3c4;
+    -fx-background-insets: 0, 2;
+}
+
+.celda-error,
+.celda-error:focused {
+    -fx-background-color: #e53935, #ffebee;
+    -fx-background-insets: 0, 2;
+    -fx-text-fill: #b71c1c;
+}

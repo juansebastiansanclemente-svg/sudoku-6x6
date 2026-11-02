@@ -37,6 +37,10 @@
         </GridPane>
     </center>
    <bottom>
-          <Label fx:id="mensajeLabel" alignment="CENTER" text="Presiona Nuevo Juego para iniciar" BorderPane.alignment="CENTER" />
+          <Label fx:id="mensajeLabel" alignment="CENTER" text="Presiona Nuevo Juego para iniciar" BorderPane.alignment="CENTER">
+         <padding>
+            <Insets bottom="10.0" />
+         </padding>
+      </Label>
    </bottom>
 </BorderPane>
