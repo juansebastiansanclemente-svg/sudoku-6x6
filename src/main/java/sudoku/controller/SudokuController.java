@@ -17,6 +17,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import java.util.Optional;
+import sudoku.model.Sugerencia;
+
 
 public class SudokuController {
 
@@ -41,6 +43,7 @@ public class SudokuController {
         construirTablero();
         // Connect the button to its action
         nuevoJuegoButton.setOnAction(evento -> pedirConfirmacionNuevoJuego());
+        ayudaButton.setOnAction(event -> mostrarAyuda());
     }
 
     private void construirTablero() {
@@ -136,6 +139,44 @@ public class SudokuController {
         // Mark the cells that are in conflict right now
         for (Posicion posicion : partida.getConflictos()) {
             celdas[posicion.getFila()][posicion.getColumna()].getStyleClass().add("celda-error");
+        }
+    }
+    /**
+     * Gives a hint to the player: highlights an empty cell and tells which number
+     * can be placed there. The number is not written; the player decides.
+     */
+    private void mostrarAyuda() {
+        // Remove the previous hint, if any
+        limpiarAyuda();
+
+        Sugerencia sugerencia = partida.pedirAyuda();
+
+        if (sugerencia == null) {
+            // No hint was given: tell the player why
+            if (partida.getAyudasRestantes() <= 0) {
+                mensajeLabel.setText("Ya usaste todas las ayudas.");
+            } else {
+                mensajeLabel.setText("No hay ninguna ayuda disponible en este momento.");
+            }
+            return;
+        }
+
+        Posicion posicion = sugerencia.getPosicion();
+        // Highlight the suggested cell
+        celdas[posicion.getFila()][posicion.getColumna()].getStyleClass().add("celda-ayuda");
+        // Tell the number (rows and columns are shown from 1 for the player)
+        mensajeLabel.setText("Ayuda: prueba con el " + sugerencia.getValor()
+                + " en la fila " + (posicion.getFila() + 1)
+                + ", columna " + (posicion.getColumna() + 1)
+                + ". Ayudas restantes: " + sugerencia.getAyudasRestantes());
+    }
+
+    /** Removes the hint highlight from every cell. */
+    private void limpiarAyuda() {
+        for (int fila = 0; fila < Tablero.TAMANO; fila++) {
+            for (int columna = 0; columna < Tablero.TAMANO; columna++) {
+                celdas[fila][columna].getStyleClass().remove("celda-ayuda");
+            }
         }
     }
 

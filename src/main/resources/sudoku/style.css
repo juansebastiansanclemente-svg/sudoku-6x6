@@ -47,3 +47,8 @@
     -fx-border-width: 2;
     -fx-text-fill: red;
 }
+.celda-ayuda {
+    -fx-background-color: #fff3b0;
+    -fx-border-color: #e0a800;
+    -fx-border-width: 2;
+}
