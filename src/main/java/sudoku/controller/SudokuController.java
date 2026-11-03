@@ -2,6 +2,7 @@ package sudoku.controller;
 
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -11,12 +12,25 @@ import sudoku.model.Posicion;
 import sudoku.model.ResultadoMovimiento;
 import sudoku.model.Tablero;
 import sudoku.model.Posicion;
+import javafx.scene.control.Label;
+import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import java.util.Optional;
 
 public class SudokuController {
 
     @FXML
     private GridPane tableroGrid;
-
+    /** Text at the bottom of the window, used to give messages to the player. */
+    @FXML
+    private Label mensajeLabel;
+    /** Button that starts a new game. */
+    @FXML
+    private Button nuevoJuegoButton;
+    /** Button that asks for a hint. */
+    @FXML
+    private Button ayudaButton;
     /** Text fields of the board, one per cell: celdas[row][column]. */
     private final TextField[][] celdas = new TextField[Tablero.TAMANO][Tablero.TAMANO];
 
@@ -25,6 +39,8 @@ public class SudokuController {
     @FXML
     public void initialize() {
         construirTablero();
+        // Connect the button to its action
+        nuevoJuegoButton.setOnAction(evento -> pedirConfirmacionNuevoJuego());
     }
 
     private void construirTablero() {
@@ -85,6 +101,8 @@ public class SudokuController {
             // A number from 1 to 6, ask the game to place it
             int numero = texto.charAt(0) - '0';
             ResultadoMovimiento resultado = partida.ingresar(fila, columna, numero);
+            // Show the message of the game (error or confirmation)
+            mensajeLabel.setText(resultado.getMensaje());
             if (resultado.isAplicado()) {
                 celda.setText(String.valueOf(numero));
                 actualizarErrores();
@@ -92,6 +110,7 @@ public class SudokuController {
         } else if (tecla == KeyCode.BACK_SPACE || tecla == KeyCode.DELETE) {
             // Backspace or Delete: ask the game to empty the cell
             ResultadoMovimiento resultado = partida.borrar(fila, columna);
+            mensajeLabel.setText(resultado.getMensaje());
             if (resultado.isAplicado()) {
                 celda.clear();
                 actualizarErrores();
@@ -102,15 +121,43 @@ public class SudokuController {
      * Marks in red the cells that repeat a number in their row, column or block,
      * and removes the mark from the rest.
      */
+    /**
+     * Marks in red the cells that repeat a number in their row, column or block,
+     * and removes the mark from the rest.
+     */
     private void actualizarErrores() {
-        //Remove the old marks from every cell
+        // Remove the old marks from every cell
         for (int fila = 0; fila < Tablero.TAMANO; fila++) {
             for (int columna = 0; columna < Tablero.TAMANO; columna++) {
                 celdas[fila][columna].getStyleClass().remove("celda-error");
             }
         }
-        for (Posicion posicion : partida.getConflictos()){
+
+        // Mark the cells that are in conflict right now
+        for (Posicion posicion : partida.getConflictos()) {
             celdas[posicion.getFila()][posicion.getColumna()].getStyleClass().add("celda-error");
+        }
+    }
+
+    /**
+     * Asks the player to confirm before starting a new game. If the player accepts,
+     * a new board is created and drawn.
+     */
+    private void pedirConfirmacionNuevoJuego() {
+        Alert alerta = new Alert(Alert.AlertType.CONFIRMATION);
+        alerta.setTitle("Nueva partida");
+        alerta.setHeaderText("¿Quieres iniciar una nueva partida?");
+        alerta.setContentText("Se perderá el progreso de la partida actual.");
+
+        // Wait for the answer of the player
+        Optional<ButtonType> respuesta = alerta.showAndWait();
+
+        if (respuesta.isPresent() && respuesta.get() == ButtonType.OK) {
+            // Accepted: create a new board and draw it again
+            partida.nuevaPartida();
+            tableroGrid.getChildren().clear();
+            construirTablero();
+            mensajeLabel.setText("Nueva partida iniciada.");
         }
     }
 }
