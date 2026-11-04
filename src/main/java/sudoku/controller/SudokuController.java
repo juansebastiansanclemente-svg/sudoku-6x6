@@ -61,14 +61,13 @@ public class SudokuController {
                 if (tablero.esFija(fila, columna)) {
                     celda.setEditable(false);
                     celda.getStyleClass().add("celda-fija");
-                } else {
-                    // Only editable cells react to the keyboard
-                    final int filaCelda = fila;
-                    final int columnaCelda = columna;
-                    celda.setOnKeyPressed(evento -> manejarTecla(filaCelda, columnaCelda, evento));
-                    //Block the typed character too, so the text field does not write by itself
-                    celda.addEventFilter(KeyEvent.KEY_TYPED, KeyEvent::consume);
                 }
+                //Every cell reacts to the keyboard (fixed cells too, so the arrows can pass over them)
+                final int filaCelda = fila;
+                final int columnaCelda = columna;
+                celda.addEventFilter(KeyEvent.KEY_PRESSED, evento -> manejarTecla(filaCelda, columnaCelda, evento));
+                // Block the typed character too, so the text field does not write by itself
+                celda.addEventFilter(KeyEvent.KEY_TYPED, KeyEvent::consume);
                 if ((columna + 1) % Tablero.COLUMNAS_POR_BLOQUE == 0 && columna != Tablero.TAMANO - 1) {
                     celda.getStyleClass().add("borde-derecho-bloque");
                 }
@@ -82,8 +81,9 @@ public class SudokuController {
     }
 
     /**
-     * Handles a key pressed in a cell: a number from 1 to 6 is written,
-     * Backspace or Delete empties the cell, and any other key is ignored.
+     * Handles a key pressed in a cell: arrows move to the neighbour cell, a number
+     * from 1 to 6 is written, Backspace or Delete empties the cell, and any other
+     * key is ignored.
      *
      * @param fila    row of the cell
      * @param columna column of the cell
@@ -92,6 +92,7 @@ public class SudokuController {
     private void manejarTecla(int fila, int columna, KeyEvent evento) {
         TextField celda = celdas[fila][columna];
         KeyCode tecla = evento.getCode();
+
         // Stop the default typing: only the game decides what the cell shows (Tab still moves between cells)
         if (tecla != KeyCode.TAB) {
             evento.consume();
@@ -100,7 +101,15 @@ public class SudokuController {
         // Text of the key pressed (for example 3)
         String texto = evento.getText();
 
-        if (texto.length() == 1 && texto.charAt(0) >= '1' && texto.charAt(0) <= '6') {
+        if (tecla == KeyCode.UP) {
+            moverA(fila - 1, columna);
+        } else if (tecla == KeyCode.DOWN) {
+            moverA(fila + 1, columna);
+        } else if (tecla == KeyCode.LEFT) {
+            moverA(fila, columna - 1);
+        } else if (tecla == KeyCode.RIGHT) {
+            moverA(fila, columna + 1);
+        } else if (texto.length() == 1 && texto.charAt(0) >= '1' && texto.charAt(0) <= '6') {
             // A number from 1 to 6, ask the game to place it
             int numero = texto.charAt(0) - '0';
             ResultadoMovimiento resultado = partida.ingresar(fila, columna, numero);
@@ -109,6 +118,7 @@ public class SudokuController {
             if (resultado.isAplicado()) {
                 celda.setText(String.valueOf(numero));
                 actualizarErrores();
+                limpiarAyuda();
             }
         } else if (tecla == KeyCode.BACK_SPACE || tecla == KeyCode.DELETE) {
             // Backspace or Delete: ask the game to empty the cell
@@ -117,7 +127,20 @@ public class SudokuController {
             if (resultado.isAplicado()) {
                 celda.clear();
                 actualizarErrores();
+                limpiarAyuda();
             }
+        }
+    }
+    /**
+     * Moves the keyboard focus to another cell, if that cell is inside the board.
+     *
+     * @param fila    row of the cell to go to
+     * @param columna column of the cell to go to
+     */
+    private void moverA(int fila, int columna) {
+        // At the edge of the board there is no neighbour: do nothing
+        if (Tablero.dentroDelTablero(fila, columna)) {
+            celdas[fila][columna].requestFocus();
         }
     }
     /**
