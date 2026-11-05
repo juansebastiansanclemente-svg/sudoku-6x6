@@ -11,8 +11,6 @@ import sudoku.model.Partida;
 import sudoku.model.Posicion;
 import sudoku.model.ResultadoMovimiento;
 import sudoku.model.Tablero;
-import sudoku.model.Posicion;
-import javafx.scene.control.Label;
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -62,7 +60,7 @@ public class SudokuController {
                     celda.setEditable(false);
                     celda.getStyleClass().add("celda-fija");
                 }
-                //Every cell reacts to the keyboard (fixed cells too, so the arrows can pass over them)
+                // Every cell reacts to the keyboard (fixed cells too, so the arrows can pass over them)
                 final int filaCelda = fila;
                 final int columnaCelda = columna;
                 celda.addEventFilter(KeyEvent.KEY_PRESSED, evento -> manejarTecla(filaCelda, columnaCelda, evento));
@@ -71,6 +69,8 @@ public class SudokuController {
                 if ((columna + 1) % Tablero.COLUMNAS_POR_BLOQUE == 0 && columna != Tablero.TAMANO - 1) {
                     celda.getStyleClass().add("borde-derecho-bloque");
                 }
+                // Mouse: a click selects the sudoku cell
+                celda.setOnMouseClicked(event -> seleccionarCelda(filaCelda, columnaCelda));
                 if ((fila + 1) % Tablero.FILAS_POR_BLOQUE == 0 && fila != Tablero.TAMANO - 1) {
                     celda.getStyleClass().add("borde-inferior-bloque");
                 }
@@ -144,9 +144,26 @@ public class SudokuController {
         }
     }
     /**
-     * Marks in red the cells that repeat a number in their row, column or block,
-     * and removes the mark from the rest.
+     * Selects a cell when the player clicks on it: the cell takes the keyboard
+     * focus and the message tells which cell it is.
+     *
+     * @param fila    row of the cell
+     * @param columna column of the cell
      */
+    private void seleccionarCelda(int fila, int columna) {
+        // Give the keyboard to this cell, so the next key goes there
+        celdas[fila][columna].requestFocus();
+
+        // Rows and columns are shown from 1 for the player
+        String lugar = "fila " + (fila + 1) + ", columna " + (columna + 1);
+
+        if (partida.getTablero().esFija(fila, columna)) {
+            mensajeLabel.setText("Celda (" + lugar + "): es una celda fija.");
+        } else {
+            mensajeLabel.setText("Celda seleccionada: " + lugar + ".");
+        }
+    }
+
     /**
      * Marks in red the cells that repeat a number in their row, column or block,
      * and removes the mark from the rest.
