@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GeneradorSudokuTest {
 
+    private static final int TABLEROS_VERIFICADOS = 2000;
+
     @Test
     void generaDocePistasDosPorBloque() {
         GeneradorTablero generador = new GeneradorSudoku(new Random(12345));
@@ -42,6 +44,28 @@ class GeneradorSudokuTest {
     }
 
     @Test
+    void todosLosTablerosGeneradosSePuedenResolver() {
+        GeneradorTablero generador = new GeneradorSudoku(new Random(2024));
+
+        for (int intento = 0; intento < TABLEROS_VERIFICADOS; intento++) {
+            Tablero tablero = generador.generar();
+            Tablero solucion = tablero.copiar();
+
+            assertTrue(resolver(solucion, 0), "Tablero sin solución:\n" + tablero);
+            assertTrue(solucion.estaLleno());
+            assertTrue(ReglasSudoku.esTableroValido(solucion));
+
+            for (int fila = 0; fila < Tablero.TAMANO; fila++) {
+                for (int columna = 0; columna < Tablero.TAMANO; columna++) {
+                    if (tablero.esFija(fila, columna)) {
+                        assertEquals(tablero.get(fila, columna), solucion.get(fila, columna));
+                    }
+                }
+            }
+        }
+    }
+
+    @Test
     void generaTablerosDiferentes() {
         GeneradorTablero generador = new GeneradorSudoku(new Random(99));
         Set<String> tableros = new HashSet<>();
@@ -63,5 +87,28 @@ class GeneradorSudokuTest {
         GeneradorTablero generador = new GeneradorSudoku(new Random(1));
 
         assertNotNull(generador.generar());
+    }
+
+    private boolean resolver(Tablero tablero, int indice) {
+        if (indice == Tablero.TAMANO * Tablero.TAMANO) {
+            return true;
+        }
+
+        int fila = indice / Tablero.TAMANO;
+        int columna = indice % Tablero.TAMANO;
+        if (!tablero.estaVacia(fila, columna)) {
+            return resolver(tablero, indice + 1);
+        }
+
+        for (int valor = Tablero.VALOR_MINIMO; valor <= Tablero.VALOR_MAXIMO; valor++) {
+            if (ReglasSudoku.esMovimientoValido(tablero, fila, columna, valor)) {
+                tablero.set(fila, columna, valor);
+                if (resolver(tablero, indice + 1)) {
+                    return true;
+                }
+                tablero.set(fila, columna, Tablero.VACIA);
+            }
+        }
+        return false;
     }
 }
