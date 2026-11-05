@@ -17,45 +17,68 @@ import javafx.scene.control.ButtonType;
 import java.util.Optional;
 import sudoku.model.Sugerencia;
 
+/**
+ * Controller of the Sudoku window. It receives the events of the player (keyboard,
+ * mouse and buttons), asks the game what to do, and updates what the window shows.
+ * It has no Sudoku rules, those are in the model.
+ */
 
 public class SudokuController {
 
+    /** Grid that holds the 36 cells of the board. */
     @FXML
     private GridPane tableroGrid;
+
     /** Text at the bottom of the window, used to give messages to the player. */
     @FXML
     private Label mensajeLabel;
+
     /** Button that starts a new game. */
     @FXML
     private Button nuevoJuegoButton;
+
     /** Button that asks for a hint. */
     @FXML
     private Button ayudaButton;
     /** Text fields of the board, one per cell: celdas[row][column]. */
     private final TextField[][] celdas = new TextField[Tablero.TAMANO][Tablero.TAMANO];
-
+    /** The current game: the board, the moves and the hints (the model). */
     private final Partida partida = new Partida();
 
+    /** Runs when the window opens: draws the board and connects the buttons. */
     @FXML
     public void initialize() {
         construirTablero();
-        // Connect the button to its action
+        // The game starts with a board ready, so tell the player what to do
+        mensajeLabel.setText("Selecciona una celda para empezar.");
+        // Connect the new game button to its action.
         nuevoJuegoButton.setOnAction(evento -> pedirConfirmacionNuevoJuego());
+        // Connect the hint button to its action
         ayudaButton.setOnAction(event -> mostrarAyuda());
     }
 
+    /**
+     * Draws the board: creates one text field for each cell and gives it its style,
+     * its keyboard and mouse events, and the lines that separate the blocks.
+     */
     private void construirTablero() {
+        // Board of the current game
         Tablero tablero = partida.getTablero();
+        // Go through the 36 cells of the board
         for (int fila = 0; fila < Tablero.TAMANO; fila++) {
             for (int columna = 0; columna < Tablero.TAMANO; columna++) {
+                // Create the text field of this cell
                 TextField celda = new TextField();
                 // Keep a reference, to update this cell later (errors, hints, new game)
                 celdas[fila][columna] = celda;
+                // Size of the cell and centered text
                 celda.setPrefSize(60, 60);
                 celda.setAlignment(Pos.CENTER);
+                // Show the number if the cell is not empty
                 if (!tablero.estaVacia(fila, columna)) {
                     celda.setText(String.valueOf(tablero.get(fila, columna)));
                 }
+                // Initial clues cannot be edited and have their own style
                 if (tablero.esFija(fila, columna)) {
                     celda.setEditable(false);
                     celda.getStyleClass().add("celda-fija");
@@ -66,14 +89,17 @@ public class SudokuController {
                 celda.addEventFilter(KeyEvent.KEY_PRESSED, evento -> manejarTecla(filaCelda, columnaCelda, evento));
                 // Block the typed character too, so the text field does not write by itself
                 celda.addEventFilter(KeyEvent.KEY_TYPED, KeyEvent::consume);
+                // Thick line on the right of each block (except the last one)
                 if ((columna + 1) % Tablero.COLUMNAS_POR_BLOQUE == 0 && columna != Tablero.TAMANO - 1) {
                     celda.getStyleClass().add("borde-derecho-bloque");
                 }
                 // Mouse: a click selects the sudoku cell
                 celda.setOnMouseClicked(event -> seleccionarCelda(filaCelda, columnaCelda));
+                // Thick line under each block (except the last one)
                 if ((fila + 1) % Tablero.FILAS_POR_BLOQUE == 0 && fila != Tablero.TAMANO - 1) {
                     celda.getStyleClass().add("borde-inferior-bloque");
                 }
+                // Put the cell in the grid at its column and row
                 tableroGrid.add(celda, columna, fila);
 
             }
