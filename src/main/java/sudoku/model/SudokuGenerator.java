@@ -51,7 +51,11 @@ public class SudokuGenerator implements BoardGenerator {
         return board;
     }
 
-    /** Fills the whole board with a valid solution using backtracking. */
+    /**
+     * Fills the whole board with a valid solution using backtracking.
+     *
+     * @return a complete board with a valid solution
+     */
     private Board generateSolution() {
         Board solution = new Board();
         if (!solve(solution, 0)) {
@@ -60,7 +64,13 @@ public class SudokuGenerator implements BoardGenerator {
         return solution;
     }
 
-    /** Tries random numbers in the next cell and backtracks when a number fails. */
+    /**
+     * Tries random numbers in the next cell and backtracks when a number fails.
+     *
+     * @param board the board being filled
+     * @param index position of the cell to fill, from 0 to 35 (row by row)
+     * @return true if the rest of the board could be filled
+     */
     private boolean solve(Board board, int index) {
         if (index == Board.SIZE * Board.SIZE) {
             return true;
@@ -83,7 +93,11 @@ public class SudokuGenerator implements BoardGenerator {
         return false;
     }
 
-    /** Chooses two random cells from each 2x3 block to show as clues. */
+    /**
+     * Chooses two random cells from each 2x3 block to show as clues.
+     *
+     * @return the 12 chosen positions
+     */
     private List<Position> choosePositions() {
         List<Position> positions = new ArrayList<>();
         for (int blockRow = 0; blockRow < Board.SIZE; blockRow += Board.BLOCK_ROWS) {
