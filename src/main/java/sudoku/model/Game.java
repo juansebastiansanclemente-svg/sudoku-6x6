@@ -12,94 +12,94 @@ import java.util.Set;
  * Sudoku rules, and gives hints. The first board comes from a generator.
  */
 
-public class Partida {
+public class Game {
 
     /** Number of hints the player can use in each game. */
-    public static final int AYUDAS_POR_PARTIDA = 3;
+    public static final int HINTS_PER_GAME = 3;
 
     /** Creates the board of each new game. */
-    private final GeneradorTablero generador;
+    private final BoardGenerator generator;
     /** Used to choose the cell and the number of a hint at random. */
     private final Random random;
     /** Board of the current game. */
-    private Tablero tablero;
+    private Board board;
     /** Hints the player can still use in the current game. */
-    private int ayudasRestantes;
+    private int remainingHints;
 
     /** Creates a game with the default generator and a random choice. */
-    public Partida() {
+    public Game() {
         // Use the default generator
-        this(new GeneradorSudoku());
+        this(new SudokuGenerator());
     }
 
     /** Creates a game with the given generator.
-     * @param generador creates the board of each game
+     * @param generator creates the board of each game
      */
 
-    public Partida(GeneradorTablero generador) {
+    public Game(BoardGenerator generator) {
         // Use a new random source
-        this(generador, new Random());
+        this(generator, new Random());
     }
 
     /** Creates a game with the given generator and random source. It is useful for tests, because a fixed random gives repeatable results.
-     * @param generador creates the board of each game
+     * @param generator creates the board of each game
      * @param random chooses the hints at random
      * @throws IllegalArgumentException if any of them is null
      */
 
-    public Partida(GeneradorTablero generador, Random random) {
+    public Game(BoardGenerator generator, Random random) {
         // Both are needed to play, so null is not accepted
-        if (generador == null || random == null) {
+        if (generator == null || random == null) {
             throw new IllegalArgumentException("El generador y el aleatorio no pueden ser nulos.");
         }
-        this.generador = generador;
+        this.generator = generator;
         this.random = random;
         // Create the first board and give the hints
-        iniciarPartida();
+        startGame();
     }
 
     /** Creates a game that starts with a board that is already made (for example, in tests).
-     * @param tableroInicial the board to start with
+     * @param initialBoard the board to start with
      * @throws IllegalArgumentException if the board is null
      */
 
-    public Partida(Tablero tableroInicial) {
+    public Game(Board initialBoard) {
         // Without a board there is no game
-        if (tableroInicial == null) {
+        if (initialBoard == null) {
             throw new IllegalArgumentException("El tablero inicial no puede ser nulo.");
         }
         // Default generator, used only if a new game is requested later
-        this.generador = new GeneradorSudoku();
+        this.generator = new SudokuGenerator();
         this.random = new Random();
         // Play on the board that was given
-        this.tablero = tableroInicial;
-        this.ayudasRestantes = AYUDAS_POR_PARTIDA;
+        this.board = initialBoard;
+        this.remainingHints = HINTS_PER_GAME;
     }
 
     /** Starts a new game: creates a new board and gives all the hints again.
      * @return the new board
      */
 
-    public Tablero nuevaPartida() {
+    public Board newGame() {
         // Replace the board and reset the hints
-        iniciarPartida();
-        return tablero;
+        startGame();
+        return board;
     }
 
     /** Returns the board of the current game.
      * @return the board
      */
 
-    public Tablero getTablero() {
-        return tablero;
+    public Board getBoard() {
+        return board;
     }
 
     /** Returns how many hints the player can still use.
      * @return the remaining hints
      */
 
-    public int getAyudasRestantes() {
-        return ayudasRestantes;
+    public int getRemainingHints() {
+        return remainingHints;
     }
 
     /**
@@ -107,83 +107,83 @@ public class Partida {
      * column or block, it is still placed, but the cells in conflict are returned
      * so they can be highlighted.
      *
-     * @param fila    row of the cell
-     * @param columna column of the cell
-     * @param valor   number to put (1 to 6)
+     * @param row    row of the cell
+     * @param column column of the cell
+     * @param value  number to put (1 to 6)
      * @return the result of the move, with a message for the player
      */
 
-    public ResultadoMovimiento ingresar(int fila, int columna, int valor) {
+    public MoveResult placeNumber(int row, int column, int value) {
         // Reject a cell outside the board
-        if (!Tablero.dentroDelTablero(fila, columna)) {
-            return ResultadoMovimiento.rechazado("La posición está fuera del tablero.");
+        if (!Board.isInsideBoard(row, column)) {
+            return MoveResult.rejected("La posición está fuera del tablero.");
         }
         // Reject numbers that are not from 1 to 6
-        if (valor < Tablero.VALOR_MINIMO || valor > Tablero.VALOR_MAXIMO) {
-            return ResultadoMovimiento.rechazado("Solo se permiten números del 1 al 6.");
+        if (value < Board.MIN_VALUE || value > Board.MAX_VALUE) {
+            return MoveResult.rejected("Solo se permiten números del 1 al 6.");
         }
         // Reject changes to the initial clues
-        if (tablero.esFija(fila, columna)) {
-            return ResultadoMovimiento.rechazado("Esa celda es una pista fija y no se puede modificar.");
+        if (board.isFixed(row, column)) {
+            return MoveResult.rejected("Esa celda es una pista fija y no se puede modificar.");
         }
         // The move is allowed: place the number
-        tablero.set(fila, columna, valor);
+        board.set(row, column, value);
         // Look for cells that repeat this number
-        Set<Posicion> conflictos = ReglasSudoku.conflictosDe(tablero, fila, columna);
+        Set<Position> conflicts = SudokuRules.findConflictsOf(board, row, column);
         // No conflicts: the number follows the rules
-        if (conflictos.isEmpty()) {
+        if (conflicts.isEmpty()) {
             // This was the last number: the game is won
-            if (estaResuelto()) {
+            if (isSolved()) {
                 // Solved = no empty cells and no repeated numbers
-                return ResultadoMovimiento.aplicadoValido("¡Tablero completado correctamente!");
+                return MoveResult.appliedValid("¡Tablero completado correctamente!");
             }
-            return ResultadoMovimiento.aplicadoValido("Número colocado.");
+            return MoveResult.appliedValid("Número colocado.");
         }
         // Placed, but it repeats a number: send the cells to highlight
-        return ResultadoMovimiento.aplicadoConConflictos(conflictos,
-                "El número " + valor + " incumple las reglas del Sudoku.");
+        return MoveResult.appliedWithConflicts(conflicts,
+                "El número " + value + " incumple las reglas del Sudoku.");
     }
 
     /**
      * Empties a cell that the player filled before.
      *
-     * @param fila    row of the cell
-     * @param columna column of the cell
+     * @param row    row of the cell
+     * @param column column of the cell
      * @return the result of the move, with a message for the player
      */
 
-    public ResultadoMovimiento borrar(int fila, int columna) {
+    public MoveResult clearCell(int row, int column) {
         // Reject a cell outside the board
-        if (!Tablero.dentroDelTablero(fila, columna)) {
-            return ResultadoMovimiento.rechazado("La posición está fuera del tablero.");
+        if (!Board.isInsideBoard(row, column)) {
+            return MoveResult.rejected("La posición está fuera del tablero.");
         }
         // Reject changes to the initial clues
-        if (tablero.esFija(fila, columna)) {
-            return ResultadoMovimiento.rechazado("Esa celda es una pista fija y no se puede modificar.");
+        if (board.isFixed(row, column)) {
+            return MoveResult.rejected("Esa celda es una pista fija y no se puede modificar.");
         }
         // Nothing to delete in an empty cell
-        if (tablero.estaVacia(fila, columna)) {
-            return ResultadoMovimiento.rechazado("La celda ya está vacía.");
+        if (board.isEmpty(row, column)) {
+            return MoveResult.rejected("La celda ya está vacía.");
         }
         // Empty the cell
-        tablero.set(fila, columna, Tablero.VACIA);
-        return ResultadoMovimiento.aplicadoValido("Número eliminado.");
+        board.set(row, column, Board.EMPTY);
+        return MoveResult.appliedValid("Número eliminado.");
     }
 
     /** Tells if the player solved the game: the board is full and has no repeated numbers.
      * @return true if the game is solved
      */
 
-    public boolean estaResuelto() {
-        return tablero.estaLleno() && ReglasSudoku.esTableroValido(tablero);
+    public boolean isSolved() {
+        return board.isFull() && SudokuRules.isValidBoard(board);
     }
 
     /** Returns all the cells that repeat a number in their row, column or block.
      * @return the cells in conflict (empty if none)
      */
 
-    public Set<Posicion> getConflictos() {
-        return ReglasSudoku.conflictos(tablero);
+    public Set<Position> getConflicts() {
+        return SudokuRules.findConflicts(board);
     }
 
     /**
@@ -194,35 +194,34 @@ public class Partida {
      * @return the hint, or null if there are no hints left or no cell can receive a number
      */
 
-    public Sugerencia pedirAyuda() {
+    public Hint requestHint() {
         // No hints left
-        if (ayudasRestantes <= 0) {
-            // The rules class does the checking
+        if (remainingHints <= 0) {
             return null;
         }
         // Collect all the empty cells
-        List<Posicion> vacias = new ArrayList<>();
-        for (int fila = 0; fila < Tablero.TAMANO; fila++) {
-            for (int columna = 0; columna < Tablero.TAMANO; columna++) {
-                if (tablero.estaVacia(fila, columna)) {
-                    vacias.add(new Posicion(fila, columna));
+        List<Position> emptyCells = new ArrayList<>();
+        for (int row = 0; row < Board.SIZE; row++) {
+            for (int column = 0; column < Board.SIZE; column++) {
+                if (board.isEmpty(row, column)) {
+                    emptyCells.add(new Position(row, column));
                 }
             }
         }
         // Mix them, so the hint is not always in the same place
-        Collections.shuffle(vacias, random);
+        Collections.shuffle(emptyCells, random);
         // Look for the first empty cell that can receive a number
-        for (Posicion posicion : vacias) {
+        for (Position position : emptyCells) {
             // Numbers that follow the rules in this cell
-            List<Integer> candidatos = ReglasSudoku.candidatos(tablero,
-                    posicion.getFila(), posicion.getColumna());
+            List<Integer> candidates = SudokuRules.findCandidates(board,
+                    position.getRow(), position.getColumn());
             // Found a cell with at least one possible number
-            if (!candidatos.isEmpty()) {
+            if (!candidates.isEmpty()) {
                 // Choose one of the possible numbers at random
-                int valor = candidatos.get(random.nextInt(candidatos.size()));
+                int value = candidates.get(random.nextInt(candidates.size()));
                 // Using a hint costs one
-                ayudasRestantes--;
-                return new Sugerencia(posicion, valor, ayudasRestantes);
+                remainingHints--;
+                return new Hint(position, value, remainingHints);
             }
         }
         // No empty cell can receive a number
@@ -230,10 +229,10 @@ public class Partida {
     }
 
     /** Creates a new board with the generator and gives all the hints again. */
-    private void iniciarPartida() {
+    private void startGame() {
         // Ask the generator for a new board
-        this.tablero = generador.generar();
+        this.board = generator.generate();
         // Reset the hints
-        this.ayudasRestantes = AYUDAS_POR_PARTIDA;
+        this.remainingHints = HINTS_PER_GAME;
     }
 }

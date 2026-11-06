@@ -6,7 +6,7 @@ package sudoku.model;
  * because the game only depends on this interface.
  */
 
-public interface GeneradorTablero {
+public interface BoardGenerator {
 
     /**
      * Creates a new board with its initial clues already placed and fixed.
@@ -14,5 +14,5 @@ public interface GeneradorTablero {
      * @return a new board ready to play
      */
 
-    Tablero generar();
+    Board generate();
 }
