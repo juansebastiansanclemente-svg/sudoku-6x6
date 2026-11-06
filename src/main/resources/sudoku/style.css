@@ -1,24 +1,24 @@
-.borde-derecho-bloque{
+.block-border-right {
     -fx-border-color: black;
     -fx-border-width: 0 2 0 0;
 }
 
-.borde-inferior-bloque{
+.block-border-bottom {
     -fx-border-color: black;
     -fx-border-width: 0 0 2 0;
 }
 
-.borde-derecho-bloque.borde-inferior-bloque{
+.block-border-right.block-border-bottom {
     -fx-border-color: black;
     -fx-border-width: 0 2 2 0;
 }
 
-.tablero{
+.board {
     -fx-border-color: black;
     -fx-border-width: 2;
 }
 
-.celda-fija {
+.cell-fixed {
     -fx-background-color: #b0b0b0, #e0e0e0;
     -fx-background-insets: 0, 1;
     -fx-font-weight: bold;
@@ -30,24 +30,20 @@
     -fx-background-insets: 0, 2;
 }
 
-.celda-sugerencia,
-.celda-sugerencia:focused {
-    -fx-background-color: #f9a825, #fff3c4;
-    -fx-background-insets: 0, 2;
-}
-
-.celda-error,
-.celda-error:focused {
+.cell-error,
+.cell-error:focused {
     -fx-background-color: #e53935, #ffebee;
     -fx-background-insets: 0, 2;
     -fx-text-fill: #b71c1c;
 }
-.celda-error {
+
+.cell-error {
     -fx-border-color: red;
     -fx-border-width: 2;
     -fx-text-fill: red;
 }
-.celda-ayuda {
+
+.cell-hint {
     -fx-background-color: #fff3b0;
     -fx-border-color: #e0a800;
     -fx-border-width: 2;
