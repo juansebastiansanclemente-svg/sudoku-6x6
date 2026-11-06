@@ -184,7 +184,7 @@ public class SudokuController {
         String lugar = "fila " + (fila + 1) + ", columna " + (columna + 1);
 
         if (partida.getTablero().esFija(fila, columna)) {
-            mensajeLabel.setText("Celda (" + lugar + "): es una celda fija.");
+            mensajeLabel.setText("Celda (" + lugar + "): es una pista fija.");
         } else {
             mensajeLabel.setText("Celda seleccionada: " + lugar + ".");
         }
