@@ -14,41 +14,41 @@ final class TablerosDePrueba {
     private TablerosDePrueba() {
     }
 
-    static Tablero solucionSinFijar() {
-        Tablero tablero = new Tablero();
-        for (int fila = 0; fila < Tablero.TAMANO; fila++) {
-            for (int columna = 0; columna < Tablero.TAMANO; columna++) {
-                tablero.set(fila, columna, SOLUCION[fila][columna]);
+    static Board solucionSinFijar() {
+        Board board = new Board();
+        for (int fila = 0; fila < sudoku.model.Board.SIZE; fila++) {
+            for (int columna = 0; columna < sudoku.model.Board.SIZE; columna++) {
+                board.set(fila, columna, SOLUCION[fila][columna]);
             }
         }
-        return tablero;
+        return board;
     }
 
-    static Tablero solucionFija() {
-        Tablero tablero = new Tablero();
-        for (int fila = 0; fila < Tablero.TAMANO; fila++) {
-            for (int columna = 0; columna < Tablero.TAMANO; columna++) {
-                tablero.fijar(fila, columna, SOLUCION[fila][columna]);
+    static Board solucionFija() {
+        Board board = new Board();
+        for (int fila = 0; fila < sudoku.model.Board.SIZE; fila++) {
+            for (int columna = 0; columna < sudoku.model.Board.SIZE; columna++) {
+                board.fix(fila, columna, SOLUCION[fila][columna]);
             }
         }
-        return tablero;
+        return board;
     }
 
-    static Tablero solucionConVacios(Posicion... vacias) {
-        Tablero tablero = new Tablero();
-        for (int fila = 0; fila < Tablero.TAMANO; fila++) {
-            for (int columna = 0; columna < Tablero.TAMANO; columna++) {
+    static Board solucionConVacios(Position... vacias) {
+        Board board = new Board();
+        for (int fila = 0; fila < sudoku.model.Board.SIZE; fila++) {
+            for (int columna = 0; columna < sudoku.model.Board.SIZE; columna++) {
                 if (!contiene(vacias, fila, columna)) {
-                    tablero.fijar(fila, columna, SOLUCION[fila][columna]);
+                    board.fix(fila, columna, SOLUCION[fila][columna]);
                 }
             }
         }
-        return tablero;
+        return board;
     }
 
-    private static boolean contiene(Posicion[] posiciones, int fila, int columna) {
-        for (Posicion posicion : posiciones) {
-            if (posicion.getFila() == fila && posicion.getColumna() == columna) {
+    private static boolean contiene(Position[] posiciones, int fila, int columna) {
+        for (Position position : posiciones) {
+            if (position.getRow() == fila && position.getColumn() == columna) {
                 return true;
             }
         }

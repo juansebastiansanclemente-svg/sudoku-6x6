@@ -7,53 +7,53 @@ import java.util.Objects;
  * It cannot be changed after it is created.
  */
 
-public final class Posicion {
+public final class Position {
     /** Row of the cell, counted from 0 at the top. */
-    private final int fila;
+    private final int row;
     /** Row of the cell, counted from 0 at the top. */
-    private final int columna;
+    private final int column;
 
     /** Creates a position with the given row and column.
-     * @param fila the row index of the cell
-     * @param columna the column index of the cell */
+     * @param row the row index of the cell
+     * @param column the column index of the cell */
 
-    public Posicion(int fila, int columna) {
+    public Position(int row, int column) {
         // Save the values; they never change because the fields are final
-        this.fila = fila;
-        this.columna = columna;
+        this.row = row;
+        this.column = column;
     }
     /** Returns the row index of this position.
      * @return the row index */
 
-    public int getFila() {
-        return fila;
+    public int getRow() {
+        return row;
     }
 
     /** Returns the column index of this position.
      * @return the column index */
 
-    public int getColumna() {
-        return columna;
+    public int getColumn() {
+        return column;
     }
 
     /** Compares this position with another object; they are equal when row and column match.
-     * @param otro the object to compare with
+     * @param other the object to compare with
      * @return true if both positions have the same row and column */
 
     @Override
-    public boolean equals(Object otro) {
+    public boolean equals(Object other) {
         // Same object: it is equal to itself
-        if (this == otro) {
+        if (this == other) {
             return true;
         }
         // Not a Posicion (or null): it cannot be equal
-        if (!(otro instanceof Posicion)) {
+        if (!(other instanceof Position)) {
             return false;
         }
         // Safe to convert, because the check above passed
-        Posicion posicion = (Posicion) otro;
+        Position position = (Position) other;
         // Equal only when row and column both match
-        return fila == posicion.fila && columna == posicion.columna;
+        return row == position.row && column == position.column;
     }
     /** Returns a hash code consistent with {@link #equals(Object)}.
      * @return the hash code of this position */
@@ -62,7 +62,7 @@ public final class Posicion {
     // Uses the same fields as equals, so equal positions give the same hash.
     // Needed because positions are stored in sets (for example, the conflicts).
     public int hashCode() {
-        return Objects.hash(fila, columna);
+        return Objects.hash(row, column);
     }
 
     /** Returns the position as text in the form "(row, column)".
@@ -71,6 +71,6 @@ public final class Posicion {
     @Override
     // Example: row 2 and column 4 give "(2, 4)"
     public String toString() {
-        return "(" + fila + ", " + columna + ")";
+        return "(" + row + ", " + column + ")";
     }
 }
