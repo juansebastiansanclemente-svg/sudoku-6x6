@@ -7,15 +7,15 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.GridPane;
-import sudoku.model.Partida;
-import sudoku.model.Posicion;
-import sudoku.model.ResultadoMovimiento;
-import sudoku.model.Tablero;
+import sudoku.model.Game;
+import sudoku.model.Position;
+import sudoku.model.MoveResult;
+import sudoku.model.Board;
 import javafx.scene.control.Button;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import java.util.Optional;
-import sudoku.model.Sugerencia;
+import sudoku.model.Hint;
 
 /**
  * Controller of the Sudoku window. It receives the events of the player (keyboard,
@@ -41,9 +41,9 @@ public class SudokuController {
     @FXML
     private Button ayudaButton;
     /** Text fields of the board, one per cell: celdas[row][column]. */
-    private final TextField[][] celdas = new TextField[Tablero.TAMANO][Tablero.TAMANO];
+    private final TextField[][] celdas = new TextField[Board.SIZE][Board.SIZE];
     /** The current game: the board, the moves and the hints (the model). */
-    private final Partida partida = new Partida();
+    private final Game partida = new Game();
 
     /** Runs when the window opens: draws the board and connects the buttons. */
     @FXML
@@ -63,10 +63,10 @@ public class SudokuController {
      */
     private void construirTablero() {
         // Board of the current game
-        Tablero tablero = partida.getTablero();
+        Board tablero = partida.getBoard();
         // Go through the 36 cells of the board
-        for (int fila = 0; fila < Tablero.TAMANO; fila++) {
-            for (int columna = 0; columna < Tablero.TAMANO; columna++) {
+        for (int fila = 0; fila < Board.SIZE; fila++) {
+            for (int columna = 0; columna < Board.SIZE; columna++) {
                 // Create the text field of this cell
                 TextField celda = new TextField();
                 // Keep a reference, to update this cell later (errors, hints, new game)
@@ -75,11 +75,11 @@ public class SudokuController {
                 celda.setPrefSize(60, 60);
                 celda.setAlignment(Pos.CENTER);
                 // Show the number if the cell is not empty
-                if (!tablero.estaVacia(fila, columna)) {
+                if (!tablero.isEmpty(fila, columna)) {
                     celda.setText(String.valueOf(tablero.get(fila, columna)));
                 }
                 // Initial clues cannot be edited and have their own style
-                if (tablero.esFija(fila, columna)) {
+                if (tablero.isFixed(fila, columna)) {
                     celda.setEditable(false);
                     celda.getStyleClass().add("celda-fija");
                 }
@@ -90,13 +90,13 @@ public class SudokuController {
                 // Block the typed character too, so the text field does not write by itself
                 celda.addEventFilter(KeyEvent.KEY_TYPED, KeyEvent::consume);
                 // Thick line on the right of each block (except the last one)
-                if ((columna + 1) % Tablero.COLUMNAS_POR_BLOQUE == 0 && columna != Tablero.TAMANO - 1) {
+                if ((columna + 1) % Board.BLOCK_COLUMNS == 0 && columna != Board.SIZE - 1) {
                     celda.getStyleClass().add("borde-derecho-bloque");
                 }
                 // Mouse: a click selects the sudoku cell
                 celda.setOnMouseClicked(event -> seleccionarCelda(filaCelda, columnaCelda));
                 // Thick line under each block (except the last one)
-                if ((fila + 1) % Tablero.FILAS_POR_BLOQUE == 0 && fila != Tablero.TAMANO - 1) {
+                if ((fila + 1) % Board.BLOCK_ROWS == 0 && fila != Board.SIZE - 1) {
                     celda.getStyleClass().add("borde-inferior-bloque");
                 }
                 // Put the cell in the grid at its column and row
@@ -138,19 +138,19 @@ public class SudokuController {
         } else if (texto.length() == 1 && texto.charAt(0) >= '1' && texto.charAt(0) <= '6') {
             // A number from 1 to 6, ask the game to place it
             int numero = texto.charAt(0) - '0';
-            ResultadoMovimiento resultado = partida.ingresar(fila, columna, numero);
+            MoveResult resultado = partida.placeNumber(fila, columna, numero);
             // Show the message of the game (error or confirmation)
-            mensajeLabel.setText(resultado.getMensaje());
-            if (resultado.isAplicado()) {
+            mensajeLabel.setText(resultado.getMessage());
+            if (resultado.isApplied()) {
                 celda.setText(String.valueOf(numero));
                 actualizarErrores();
                 limpiarAyuda();
             }
         } else if (tecla == KeyCode.BACK_SPACE || tecla == KeyCode.DELETE) {
             // Backspace or Delete: ask the game to empty the cell
-            ResultadoMovimiento resultado = partida.borrar(fila, columna);
-            mensajeLabel.setText(resultado.getMensaje());
-            if (resultado.isAplicado()) {
+            MoveResult resultado = partida.clearCell(fila, columna);
+            mensajeLabel.setText(resultado.getMessage());
+            if (resultado.isApplied()) {
                 celda.clear();
                 actualizarErrores();
                 limpiarAyuda();
@@ -165,7 +165,7 @@ public class SudokuController {
      */
     private void moverA(int fila, int columna) {
         // At the edge of the board there is no neighbour: do nothing
-        if (Tablero.dentroDelTablero(fila, columna)) {
+        if (Board.isInsideBoard(fila, columna)) {
             celdas[fila][columna].requestFocus();
         }
     }
@@ -183,7 +183,7 @@ public class SudokuController {
         // Rows and columns are shown from 1 for the player
         String lugar = "fila " + (fila + 1) + ", columna " + (columna + 1);
 
-        if (partida.getTablero().esFija(fila, columna)) {
+        if (partida.getBoard().isFixed(fila, columna)) {
             mensajeLabel.setText("Celda (" + lugar + "): es una pista fija.");
         } else {
             mensajeLabel.setText("Celda seleccionada: " + lugar + ".");
@@ -196,15 +196,15 @@ public class SudokuController {
      */
     private void actualizarErrores() {
         // Remove the old marks from every cell
-        for (int fila = 0; fila < Tablero.TAMANO; fila++) {
-            for (int columna = 0; columna < Tablero.TAMANO; columna++) {
+        for (int fila = 0; fila < Board.SIZE; fila++) {
+            for (int columna = 0; columna < Board.SIZE; columna++) {
                 celdas[fila][columna].getStyleClass().remove("celda-error");
             }
         }
 
         // Mark the cells that are in conflict right now
-        for (Posicion posicion : partida.getConflictos()) {
-            celdas[posicion.getFila()][posicion.getColumna()].getStyleClass().add("celda-error");
+        for (Position posicion : partida.getConflicts()) {
+            celdas[posicion.getRow()][posicion.getColumn()].getStyleClass().add("celda-error");
         }
     }
     /**
@@ -215,11 +215,11 @@ public class SudokuController {
         // Remove the previous hint, if any
         limpiarAyuda();
 
-        Sugerencia sugerencia = partida.pedirAyuda();
+        Hint sugerencia = partida.requestHint();
 
         if (sugerencia == null) {
             // No hint was given: tell the player why
-            if (partida.getAyudasRestantes() <= 0) {
+            if (partida.getRemainingHints() <= 0) {
                 mensajeLabel.setText("Ya usaste todas las ayudas.");
             } else {
                 mensajeLabel.setText("No hay ninguna ayuda disponible en este momento.");
@@ -227,20 +227,20 @@ public class SudokuController {
             return;
         }
 
-        Posicion posicion = sugerencia.getPosicion();
+        Position posicion = sugerencia.getPosition();
         // Highlight the suggested cell
-        celdas[posicion.getFila()][posicion.getColumna()].getStyleClass().add("celda-ayuda");
+        celdas[posicion.getRow()][posicion.getColumn()].getStyleClass().add("celda-ayuda");
         // Tell the number (rows and columns are shown from 1 for the player)
-        mensajeLabel.setText("Ayuda: prueba con el " + sugerencia.getValor()
-                + " en la fila " + (posicion.getFila() + 1)
-                + ", columna " + (posicion.getColumna() + 1)
-                + ". Ayudas restantes: " + sugerencia.getAyudasRestantes());
+        mensajeLabel.setText("Ayuda: prueba con el " + sugerencia.getValue()
+                + " en la fila " + (posicion.getRow() + 1)
+                + ", columna " + (posicion.getColumn() + 1)
+                + ". Ayudas restantes: " + sugerencia.getRemainingHints());
     }
 
     /** Removes the hint highlight from every cell. */
     private void limpiarAyuda() {
-        for (int fila = 0; fila < Tablero.TAMANO; fila++) {
-            for (int columna = 0; columna < Tablero.TAMANO; columna++) {
+        for (int fila = 0; fila < Board.SIZE; fila++) {
+            for (int columna = 0; columna < Board.SIZE; columna++) {
                 celdas[fila][columna].getStyleClass().remove("celda-ayuda");
             }
         }
@@ -261,7 +261,7 @@ public class SudokuController {
 
         if (respuesta.isPresent() && respuesta.get() == ButtonType.OK) {
             // Accepted: create a new board and draw it again
-            partida.nuevaPartida();
+            partida.newGame();
             tableroGrid.getChildren().clear();
             construirTablero();
             mensajeLabel.setText("Nueva partida iniciada.");

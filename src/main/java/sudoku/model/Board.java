@@ -8,118 +8,119 @@ import java.util.Arrays;
  * into 6 blocks of 2 rows by 3 columns. Rows and columns start at 0.
  */
 
-public class Tablero {
+public class Board {
 
     /** Number of rows and columns of the board. */
-    public static final int TAMANO = 6;
+    public static final int SIZE = 6;
     /** Rows in each block. */
-    public static final int FILAS_POR_BLOQUE = 2;
+    public static final int BLOCK_ROWS = 2;
     /** Columns in each block. */
-    public static final int COLUMNAS_POR_BLOQUE = 3;
+    public static final int BLOCK_COLUMNS = 3;
     /** Smallest number a cell can hold. */
-    public static final int VALOR_MINIMO = 1;
+    public static final int MIN_VALUE = 1;
     /** Biggest number a cell can hold. */
-    public static final int VALOR_MAXIMO = 6;
+    public static final int MAX_VALUE = 6;
     /** Value that means the cell is empty. */
-    public static final int VACIA = 0;
+    public static final int EMPTY = 0;
 
     /** Number in each cell (0 if empty). */
-    private final int[][] celdas;
+    private final int[][] cells;
     /** True in the cells that are initial clues and cannot be changed. */
-    private final boolean[][] fijas;
+    private final boolean[][] fixed;
 
     /** Creates an empty board with no fixed cells. */
-    public Tablero() {
+    public Board() {
         // All numbers start at 0 (empty)
-        celdas = new int[TAMANO][TAMANO];
+        cells = new int[SIZE][SIZE];
         // All cells start as not fixed
-        fijas = new boolean[TAMANO][TAMANO];
+        fixed = new boolean[SIZE][SIZE];
     }
 
     /** Returns the number in a cell.
-     * @param fila row of the cell
-     * @param columna column of the cell
+     * @param row row of the cell
+     * @param column column of the cell
      * @return the number (0 if empty)
      * @throws IllegalArgumentException if the position is outside the board
      */
 
-    public int get(int fila, int columna) {
+    public int get(int row, int column) {
         // Stop here if the position is outside the board
-        validarPosicion(fila, columna);
-        return celdas[fila][columna];
+        validatePosition(row, column);
+        return cells[row][column];
     }
 
     /** Puts a number in a cell. Use 0 to empty it.
-     * @param fila row of the cell
-     * @param columna column of the cell @param valor number from 1 to 6, or 0 to empty the cell
+     * @param row row of the cell
+     * @param column column of the cell
+     * @param value number from 1 to 6, or 0 to empty the cell
      * @throws IllegalArgumentException if the position or the number is not valid
      * @throws IllegalStateException if the cell is fixed and the number is different
      */
 
-    public void set(int fila, int columna, int valor) {
+    public void set(int row, int column, int value) {
         // Stop here if the position is outside the board
-        validarPosicion(fila, columna);
+        validatePosition(row, column);
         // Stop here if the number is not between 0 and 6
-        validarValor(valor);
+        validateValue(value);
         // A fixed cell can only be "set" to its own number
-        if (fijas[fila][columna] && celdas[fila][columna] != valor) {
+        if (fixed[row][column] && cells[row][column] != value) {
             throw new IllegalStateException("No se puede modificar una celda fija.");
         }
-        celdas[fila][columna] = valor;
+        cells[row][column] = value;
     }
 
     /** Puts a number in a cell and marks it as fixed (an initial clue).
-     * @param fila row of the cell
-     * @param columna column of the cell
-     * @param valor number from 1 to 6
+     * @param row row of the cell
+     * @param column column of the cell
+     * @param value number from 1 to 6
      * @throws IllegalArgumentException if the position or the number is not valid
      */
 
-    public void fijar(int fila, int columna, int valor) {
+    public void markFixed(int row, int column, int value) {
         // Stop here if the position is outside the board
-        validarPosicion(fila, columna);
+        validatePosition(row, column);
         // Fixed clues must be a real number (1 to 6), never empty
-        if (valor < VALOR_MINIMO || valor > VALOR_MAXIMO) {
+        if (value < MIN_VALUE || value > MAX_VALUE) {
             throw new IllegalArgumentException("El valor debe estar entre 1 y 6.");
         }
-        celdas[fila][columna] = valor;
+        cells[row][column] = value;
         // Mark it as a clue the player cannot change
-        fijas[fila][columna] = true;
+        fixed[row][column] = true;
     }
 
     /** Tells if a cell is a fixed clue.
-     * @param fila row of the cell
-     * @param columna column of the cell
+     * @param row row of the cell
+     * @param column column of the cell
      * @return true if the cell is fixed
      */
 
-    public boolean esFija(int fila, int columna) {
+    public boolean isFixed(int row, int column) {
         // Stop here if the position is outside the board
-        validarPosicion(fila, columna);
-        return fijas[fila][columna];
+        validatePosition(row, column);
+        return fixed[row][column];
     }
 
     /** Tells if a cell is empty.
-     * @param fila row of the cell
-     * @param columna column of the cell
+     * @param row row of the cell
+     * @param column column of the cell
      * @return true if the cell has no number
      */
 
-    public boolean estaVacia(int fila, int columna) {
+    public boolean isEmpty(int row, int column) {
         // Stop here if the position is outside the board
-        validarPosicion(fila, columna);
-        return celdas[fila][columna] == VACIA;
+        validatePosition(row, column);
+        return cells[row][column] == EMPTY;
     }
 
     /** Tells if every cell has a number.
      * @return true if there are no empty cells
      */
 
-    public boolean estaLleno() {
+    public boolean isFull() {
         // Go through every cell
-        for (int fila = 0; fila < TAMANO; fila++) {
-            for (int columna = 0; columna < TAMANO; columna++) {
-                if (celdas[fila][columna] == VACIA) {
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
+                if (cells[row][column] == EMPTY) {
                     // One empty cell is enough to know the board is not full
                     return false;
                 }
@@ -133,12 +134,12 @@ public class Tablero {
      * @return number of fixed cells
      */
 
-    public int contarFijas() {
+    public int countFixed() {
         // Counter that grows each time a matching cell is found
         int total = 0;
-        for (int fila = 0; fila < TAMANO; fila++) {
-            for (int columna = 0; columna < TAMANO; columna++) {
-                if (fijas[fila][columna]) {
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
+                if (fixed[row][column]) {
                     total++;
                 }
             }
@@ -150,12 +151,12 @@ public class Tablero {
      * @return number of empty cells
      */
 
-    public int contarVacias() {
+    public int countEmpty() {
         // Counter that grows each time a matching cell is found
         int total = 0;
-        for (int fila = 0; fila < TAMANO; fila++) {
-            for (int columna = 0; columna < TAMANO; columna++) {
-                if (celdas[fila][columna] == VACIA) {
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
+                if (cells[row][column] == EMPTY) {
                     total++;
                 }
             }
@@ -166,23 +167,23 @@ public class Tablero {
     /** Empties the whole board and removes all fixed clues.
      */
 
-    public void limpiar() {
-        for (int fila = 0; fila < TAMANO; fila++) {
+    public void clear() {
+        for (int row = 0; row < SIZE; row++) {
             // Fill the row with 0 (empty) and not fixed
-            Arrays.fill(celdas[fila], VACIA);
-            Arrays.fill(fijas[fila], false);
+            Arrays.fill(cells[row], EMPTY);
+            Arrays.fill(fixed[row], false);
         }
     }
 
     /** Empties only the cells filled by the player; the fixed clues stay.
      */
 
-    public void limpiarJugadas() {
-        for (int fila = 0; fila < TAMANO; fila++) {
-            for (int columna = 0; columna < TAMANO; columna++) {
+    public void clearMoves() {
+        for (int row = 0; row < SIZE; row++) {
+            for (int column = 0; column < SIZE; column++) {
                 // Only empty the cells that are not fixed clues
-                if (!fijas[fila][columna]) {
-                    celdas[fila][columna] = VACIA;
+                if (!fixed[row][column]) {
+                    cells[row][column] = EMPTY;
                 }
             }
         }
@@ -192,86 +193,86 @@ public class Tablero {
      * @return a new board with the same content
      */
 
-    public Tablero copiar() {
-        Tablero copia = new Tablero();
-        for (int fila = 0; fila < TAMANO; fila++) {
+    public Board copy() {
+        Board copy = new Board();
+        for (int row = 0; row < SIZE; row++) {
             // Copy the row of numbers and the row of fixed marks
-            System.arraycopy(celdas[fila], 0, copia.celdas[fila], 0, TAMANO);
-            System.arraycopy(fijas[fila], 0, copia.fijas[fila], 0, TAMANO);
+            System.arraycopy(cells[row], 0, copy.cells[row], 0, SIZE);
+            System.arraycopy(fixed[row], 0, copy.fixed[row], 0, SIZE);
         }
         // The copy does not share data with the original, so changing one does not change the other
-        return copia;
+        return copy;
     }
 
     /** Copies only the numbers of the cells.
      * @return a new 6x6 array with the numbers
      */
 
-    public int[][] copiarCeldas() {
-        int[][] copia = new int[TAMANO][TAMANO];
-        for (int fila = 0; fila < TAMANO; fila++) {
+    public int[][] copyCells() {
+        int[][] copy = new int[SIZE][SIZE];
+        for (int row = 0; row < SIZE; row++) {
             // Copy row by row, so the new array is independent
-            System.arraycopy(celdas[fila], 0, copia[fila], 0, TAMANO);
+            System.arraycopy(cells[row], 0, copy[row], 0, SIZE);
         }
-        return copia;
+        return copy;
     }
 
     /** Tells if a position is inside the board.
-     * @param fila row to check
-     * @param columna column to check
+     * @param row row to check
+     * @param column column to check
      * @return true if both are between 0 and 5
      */
 
-    public static boolean dentroDelTablero(int fila, int columna) {
-        return fila >= 0 && fila < TAMANO && columna >= 0 && columna < TAMANO;
+    public static boolean isInsideBoard(int row, int column) {
+        return row >= 0 && row < SIZE && column >= 0 && column < SIZE;
     }
 
     /** Tells if two cells are in the same block of 2x3.
-     * @param fila1 row of the first cell
-     * @param columna1 column of the first cell
-     * @param fila2 row of the second cell
-     * @param columna2 column of the second cell
+     * @param row1 row of the first cell
+     * @param column1 column of the first cell
+     * @param row2 row of the second cell
+     * @param column2 column of the second cell
      * @return true if both cells are in the same block
      */
 
-    public static boolean mismoBloque(int fila1, int columna1, int fila2, int columna2) {
+    public static boolean isSameBlock(int row1, int column1, int row2, int column2) {
         // Dividing by the block size gives the block row and block column; both must match
-        return fila1 / FILAS_POR_BLOQUE == fila2 / FILAS_POR_BLOQUE
-                && columna1 / COLUMNAS_POR_BLOQUE == columna2 / COLUMNAS_POR_BLOQUE;
+        return row1 / BLOCK_ROWS == row2 / BLOCK_ROWS
+                && column1 / BLOCK_COLUMNS == column2 / BLOCK_COLUMNS;
     }
 
     /** Gives the number of the block of a cell. Blocks go from 0 to 5, left to right and top to bottom.
-     * @param fila row of the cell
-     * @param columna column of the cell
+     * @param row row of the cell
+     * @param column column of the cell
      * @return the block number
      */
 
-    public static int numeroBloque(int fila, int columna) {
-        // How many blocks fit side by side in one row of the board (6 / 3 = 2 (6 blocks, 3 columns, 2 rows))
-        int bloquesPorFila = TAMANO / COLUMNAS_POR_BLOQUE;
+    public static int getBlockNumber(int row, int column) {
+        // How many blocks fit side by side in one row of the board (6 / 3 = 2)
+        int blocksPerRow = SIZE / BLOCK_COLUMNS;
         // Skip the full block rows above, then add the block column
-        return (fila / FILAS_POR_BLOQUE) * bloquesPorFila + (columna / COLUMNAS_POR_BLOQUE);
+        return (row / BLOCK_ROWS) * blocksPerRow + (column / BLOCK_COLUMNS);
     }
 
     /** Throws an error if the position is outside the board.
-     * @param fila row to check
-     * @param columna column to check
+     * @param row row to check
+     * @param column column to check
      * @throws IllegalArgumentException if the position is outside the board
      */
 
-    private void validarPosicion(int fila, int columna) {
-        if (!dentroDelTablero(fila, columna)) {
-            throw new IllegalArgumentException("Posición fuera del tablero: (" + fila + ", " + columna + ")");
+    private void validatePosition(int row, int column) {
+        if (!isInsideBoard(row, column)) {
+            throw new IllegalArgumentException("Posición fuera del tablero: (" + row + ", " + column + ")");
         }
     }
 
     /** Throws an error if the number is not between 0 and 6.
-     * @param valor number to check
+     * @param value number to check
      * @throws IllegalArgumentException if the number is out of range
      */
 
-    private void validarValor(int valor) {
-        if (valor < VACIA || valor > VALOR_MAXIMO) {
+    private void validateValue(int value) {
+        if (value < EMPTY || value > MAX_VALUE) {
             throw new IllegalArgumentException("El valor debe estar entre 0 y 6.");
         }
     }
@@ -284,22 +285,22 @@ public class Tablero {
 
     @Override
     public String toString() {
-        StringBuilder texto = new StringBuilder();
-        for (int fila = 0; fila < TAMANO; fila++) {
+        StringBuilder text = new StringBuilder();
+        for (int row = 0; row < SIZE; row++) {
             // Draw a line between blocks of rows
-            if (fila > 0 && fila % FILAS_POR_BLOQUE == 0) {
-                texto.append("------+------\n");
+            if (row > 0 && row % BLOCK_ROWS == 0) {
+                text.append("------+------\n");
             }
-            for (int columna = 0; columna < TAMANO; columna++) {
+            for (int column = 0; column < SIZE; column++) {
                 // Draw a bar between blocks of columns
-                if (columna > 0 && columna % COLUMNAS_POR_BLOQUE == 0) {
-                    texto.append("| ");
+                if (column > 0 && column % BLOCK_COLUMNS == 0) {
+                    text.append("| ");
                 }
                 // Show "." for empty cells and the number for the others
-                texto.append(celdas[fila][columna] == VACIA ? "." : celdas[fila][columna]).append(' ');
+                text.append(cells[row][column] == EMPTY ? "." : cells[row][column]).append(' ');
             }
-            texto.append('\n');
+            text.append('\n');
         }
-        return texto.toString();
+        return text.toString();
     }
 }

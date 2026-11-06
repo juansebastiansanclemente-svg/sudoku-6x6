@@ -5,45 +5,47 @@ package sudoku.model;
  * in it, and how many hints are left. It cannot be changed after it is created.
  */
 
-public final class Sugerencia {
+public final class Hint {
     /** Cell where the hint suggests placing a number. */
-    private final Posicion posicion;
+    private final Position position;
     /** Number suggested for that cell (from 1 to 6). */
-    private final int valor;
+    private final int value;
     /** Hints the player still has after using this one. */
-    private final int ayudasRestantes;
+    private final int remainingHints;
+
     /**
      * Creates a hint.
      *
-     * @param posicion        cell where the number is suggested
-     * @param valor           number suggested for that cell
-     * @param ayudasRestantes hints left after this one
+     * @param position       cell where the number is suggested
+     * @param value          number suggested for that cell
+     * @param remainingHints hints left after this one
      */
-    public Sugerencia(Posicion posicion, int valor, int ayudasRestantes) {
+    public Hint(Position position, int value, int remainingHints) {
         // Save the values, they never change because the fields are final
-        this.posicion = posicion;
-        this.valor = valor;
-        this.ayudasRestantes = ayudasRestantes;
+        this.position = position;
+        this.value = value;
+        this.remainingHints = remainingHints;
     }
+
     /** Returns the cell where the number is suggested.
      * @return the suggested cell */
 
-    public Posicion getPosicion() {
-        return posicion;
+    public Position getPosition() {
+        return position;
     }
 
     /** Returns the number suggested for the cell.
      * @return the suggested number */
 
-    public int getValor() {
-        return valor;
+    public int getValue() {
+        return value;
     }
 
     /** Returns how many hints the player has left.
      * @return the remaining hints */
 
-    public int getAyudasRestantes() {
-        return ayudasRestantes;
+    public int getRemainingHints() {
+        return remainingHints;
     }
 
     /**
@@ -55,6 +57,6 @@ public final class Sugerencia {
     @Override
     // Joins the number and the cell into one readable sentence
     public String toString() {
-        return "Sugerencia: coloca " + valor + " en " + posicion;
+        return "Sugerencia: coloca " + value + " en " + position;
     }
 }
