@@ -1,6 +1,8 @@
 package sudoku.controller;
 
 import java.util.Optional;
+
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
@@ -145,6 +147,9 @@ public class SudokuController {
                 cell.setText(String.valueOf(number));
                 updateErrors();
                 clearHint();
+                if (game.isSolved()) {
+                    showWinAlert();
+                }
             }
         } else if (key == KeyCode.BACK_SPACE || key == KeyCode.DELETE) {
             // Backspace or Delete: ask the game to empty the cell
@@ -154,6 +159,32 @@ public class SudokuController {
                 cell.clear();
                 updateErrors();
                 clearHint();
+            }
+        }
+    }
+
+    /**
+     * Displays a victory dialog when the user successfully solves the Sudoku puzzle.
+     * Offers options to either start a new game or exit the application cleanly.
+     */
+    private void showWinAlert(){
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Sudoku 6x6");
+        alert.setHeaderText("¡Felicitaciones!");
+        alert.setContentText("¡Has completado el Sudoku con éxito!");
+
+        ButtonType playAgainButton = new ButtonType("¿Jugar otra partida?");
+        ButtonType exitButton = new ButtonType("Salir");
+
+        alert.getButtonTypes().setAll(playAgainButton, exitButton);
+
+        Optional<ButtonType> result = alert.showAndWait();
+
+        if (result.isPresent()) {
+            if (result.get() == playAgainButton) {
+                confirmNewGame();
+            } else if (result.get() == exitButton) {
+                Platform.exit();
             }
         }
     }

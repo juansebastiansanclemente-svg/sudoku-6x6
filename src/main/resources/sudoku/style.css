@@ -18,6 +18,12 @@
     -fx-border-width: 2;
 }
 
+.text-field {
+    -fx-font-size: 18px;
+    -fx-aligment: center;
+    -fx-font-weight: bold;
+}
+
 .cell-fixed {
     -fx-background-color: #b0b0b0, #e0e0e0;
     -fx-background-insets: 0, 1;
@@ -28,6 +34,12 @@
 .text-field:focused {
     -fx-background-color: #2a7fff, #dbeaff;
     -fx-background-insets: 0, 2;
+}
+
+.label {
+    -fx-font-size: 15px;
+    -fx-font-size-weight: bold;
+    -fx-text-fill: #333333;
 }
 
 .cell-error,
